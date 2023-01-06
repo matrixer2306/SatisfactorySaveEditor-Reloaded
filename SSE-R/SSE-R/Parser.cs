@@ -8,6 +8,7 @@ namespace SSE_R
     {
         public void Parse(string inputPath, string outputPath)
         {
+            long outputPosition = 0;
             int count = 0;
             FileStream inputStream = File.OpenRead(inputPath);
             Debug.WriteLine(inputStream.Length);
@@ -32,18 +33,37 @@ namespace SSE_R
                         }
                     }
                 }
-                using (FileStream decompressedStream = File.Create(Path.Combine(outputPath, $"output{count}.txt")))
+                if (foundStart)
                 {
-                    using (DeflateStream decompressionStream = new(inputStream, CompressionMode.Decompress, true))
+                    using (FileStream outputStream = File.Create(Path.Combine(outputPath, "output.txt")))
                     {
-                        decompressionStream.CopyTo(decompressedStream, 131072);
-                        Debug.WriteLine($"Successfully decompressed the chunk {count}");
-                        count ++;
-                        Debug.WriteLine(inputStream.Position);
+                        using (DeflateStream decompressionStream = new(inputStream, CompressionMode.Decompress, true))
+                        {
+                            if (!decompressionStream.CanRead)
+                            {
+                                throw new Exception("cant read from decompressionstream");
+                            }
+                            else if (!outputStream.CanWrite)
+                            {
+                                throw new Exception("cant write to output.txt");
+                            }
+                            if (outputStream.CanWrite && decompressionStream.CanRead)
+                            {
+                                outputStream.Position = outputPosition;
+                                byte[] buffer = new byte[131072];
+                                decompressionStream.Read(buffer, 0, 131072);
+                                outputStream.Write(buffer, 0, 131072);
+                                foundStart = false;
+                                inputStream.Position += 131072;
+                                outputPosition = outputStream.Position;
+                                count++;
+                            }
+                        }
                     }
                 }
             }
             inputStream.Close();
+            Console.WriteLine($"decompressed {count} chunks");
         }
     }
 }
