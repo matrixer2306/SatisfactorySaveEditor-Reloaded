@@ -22,15 +22,15 @@
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net6.0"
+          "net6.0-windows10.0.22621.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net6.0": {
-            "targetAlias": "net6.0",
+          "net6.0-windows10.0.22621": {
+            "targetAlias": "net6.0-windows10.0.22621.0",
             "projectReferences": {}
           }
         },
@@ -41,8 +41,8 @@
         }
       },
       "frameworks": {
-        "net6.0": {
-          "targetAlias": "net6.0",
+        "net6.0-windows10.0.22621": {
+          "targetAlias": "net6.0-windows10.0.22621.0",
           "imports": [
             "net461",
             "net462",
@@ -54,9 +54,21 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.Windows.SDK.NET.Ref",
+              "version": "[10.0.22621.27, 10.0.22621.27]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
+            },
+            "Microsoft.Windows.SDK.NET.Ref": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WindowsForms": {
+              "privateAssets": "none"
             }
           },
           "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.402\\RuntimeIdentifierGraph.json"

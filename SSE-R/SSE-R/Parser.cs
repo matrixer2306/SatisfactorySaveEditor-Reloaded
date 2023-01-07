@@ -1,12 +1,14 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
 using System.Net;
+using System.Text;
+using Windows.Media.Playback;
 
 namespace SSE_R
 {
     public class Parser
     {
-        public void Parse(string inputPath, string outputPath)
+        public void ParseBody(string inputPath, string outputPath)
         {
             long outputPosition = 0;
             int count = 0;
@@ -28,14 +30,14 @@ namespace SSE_R
                         b = inputStream.ReadByte();
                         if (b == 0x9c)
                         {
-                            Debug.WriteLine(inputStream.Position);
+                            Debug.WriteLine($"Found chunk start at {inputStream.Position}");
                             foundStart = true;
                         }
                     }
                 }
                 if (foundStart)
                 {
-                    using (FileStream outputStream = File.Create(Path.Combine(outputPath, "output.txt")))
+                    using (FileStream outputStream = File.Create(Path.Combine(outputPath, "Body.txt")))
                     {
                         using (DeflateStream decompressionStream = new(inputStream, CompressionMode.Decompress, true))
                         {
@@ -63,7 +65,33 @@ namespace SSE_R
                 }
             }
             inputStream.Close();
-            Console.WriteLine($"decompressed {count} chunks");
+            Debug.WriteLine($"decompressed {count} chunks");
+        }
+        public void ParseHeader(string inputPath, string outputPath)
+        {
+            FileStream inputStream = File.OpenRead(inputPath);
+            inputStream.Position = 0;
+            using (FileStream outputStream = File.Create(Path.Combine(outputPath, "Header.txt")))
+            {
+                Debug.WriteLine($"input stream is {inputStream.Length} bytes long");
+                inputStream.Position = 0;
+                int count = 0;
+                while (inputStream.Position < outputStream.Length)
+                {
+                    
+                    byte[] buffer = new byte[2];
+                    inputStream.Read(buffer, 0, 2);
+                    if (buffer[0] == 0x78 && buffer[1] == 0x9c)
+                    {
+                        Debug.WriteLine($"found 78 9c after {count*2} bytes");
+                        break;
+                    }
+                    else { outputStream.Write(buffer, 0, 2); }
+                    count++;
+                }
+                Debug.WriteLine($"stopped after {count * 2} bytes");
+            }
+            inputStream.Close();
         }
     }
 }

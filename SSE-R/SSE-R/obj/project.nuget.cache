@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "cXc4H26XtJVQYh2nDNpil96/k/Dz/ofD7ts7kuScQxnOsBOm5fzvkjqS3MUKNDjgC2a3sClJh+G5esSjnjr2EQ==",
+  "dgSpecHash": "hS8GDiF4fjmkoC0MSXnt3AtEEtJLJgF63qnAyK3OLv2Iqxv/eAmdbkv7zlbrq4r7Po/z/0oUVTblzR+Xzm4UBw==",
   "success": true,
   "projectFilePath": "C:\\Users\\gerha\\Documents\\GitHub\\SatisfactorySaveEditor-Reloaded\\SSE-R\\SSE-R\\SSE-R.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\gerha\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.22621.27\\microsoft.windows.sdk.net.ref.10.0.22621.27.nupkg.sha512"
+  ],
   "logs": []
 }

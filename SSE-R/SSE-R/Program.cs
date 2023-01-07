@@ -8,7 +8,8 @@
             string outputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Outputs", "Zlib");
 
             Parser p = new();
-            p.Parse(inputPath, outputPath);
+            p.ParseBody(inputPath, outputPath);
+            p.ParseHeader(inputPath, outputPath);
         }
     }
 }
