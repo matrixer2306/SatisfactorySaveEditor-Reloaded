@@ -4,12 +4,12 @@
     {
         static void Main(string[] args)
         {
-            string inputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Outputs", "Zlib" ,"input.sav");
+            string inputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Outputs", "Zlib" ,"input1.sav");
             string outputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Outputs", "Zlib");
 
             Parser p = new();
-            p.ParseBody(inputPath, outputPath);
             p.ParseHeader(inputPath, outputPath);
+            p.ParseBody(inputPath, outputPath);
         }
     }
 }

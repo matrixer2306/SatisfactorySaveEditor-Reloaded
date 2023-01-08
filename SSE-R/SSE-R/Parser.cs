@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
+using System.Drawing.Text;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
+using Windows.Devices.PointOfService;
 using Windows.Media.Playback;
 
 namespace SSE_R
@@ -22,8 +24,8 @@ namespace SSE_R
                     int b = inputStream.ReadByte();
                     if (b == -1)
                     {
-                        throw new Exception("Reached end of file before finding the requested bytes");
-                        // replace with ending of file reading later
+                        inputStream.Close();
+                        return;
                     }
                     if (b == 0x78)
                     {
@@ -53,10 +55,10 @@ namespace SSE_R
                             {
                                 outputStream.Position = outputPosition;
                                 byte[] buffer = new byte[131072];
-                                decompressionStream.Read(buffer, 0, 131072);
+                                int bytesread = decompressionStream.Read(buffer, 0, 131072);
                                 outputStream.Write(buffer, 0, 131072);
                                 foundStart = false;
-                                inputStream.Position += 131072;
+                                inputStream.Position += bytesread;
                                 outputPosition = outputStream.Position;
                                 count++;
                             }
@@ -69,29 +71,80 @@ namespace SSE_R
         }
         public void ParseHeader(string inputPath, string outputPath)
         {
-            FileStream inputStream = File.OpenRead(inputPath);
-            inputStream.Position = 0;
-            using (FileStream outputStream = File.Create(Path.Combine(outputPath, "Header.txt")))
+            using (FileStream inputStream = File.OpenRead(inputPath))
             {
-                Debug.WriteLine($"input stream is {inputStream.Length} bytes long");
-                inputStream.Position = 0;
-                int count = 0;
-                while (inputStream.Position < outputStream.Length)
+                using (FileStream outputStream = File.Create(Path.Combine(outputPath, "Header.txt")))
                 {
-                    
-                    byte[] buffer = new byte[2];
-                    inputStream.Read(buffer, 0, 2);
-                    if (buffer[0] == 0x78 && buffer[1] == 0x9c)
+                    // set up readers for different encodings
+                    BinaryReader readerUTF16 = new(inputStream, Encoding.Default);
+                    BinaryReader readerUTF8 = new(inputStream, Encoding.UTF8);
+
+                    long Pos16()
                     {
-                        Debug.WriteLine($"found 78 9c after {count*2} bytes");
-                        break;
+                       return readerUTF16.BaseStream.Position;
                     }
-                    else { outputStream.Write(buffer, 0, 2); }
-                    count++;
+                    long Pos8()
+                    {
+                        return readerUTF8.BaseStream.Position;
+                    }
+                    // set up variables for reading strings
+                    int nextStringLength;
+                    byte[] buffer = new byte[1000000];
+
+                    // reading of variables
+                    int headerVersion = readerUTF16.ReadInt32(); 
+                    int saveVersion = readerUTF16.ReadInt32();
+                    int buildVersion = readerUTF16.ReadInt32();
+                    Debug.WriteLine(Pos16());
+
+                    string mapName = "";
+                    nextStringLength = readerUTF16.ReadInt32();
+                    Debug.WriteLine($"string length is {nextStringLength}");
+                    buffer = readerUTF16.ReadBytes(nextStringLength);
+                    foreach(byte b in buffer) { mapName += (char)b; }
+                    Debug.WriteLine(Pos16());
+
+                    string mapOptions = "";
+                    nextStringLength = readerUTF16.ReadInt32();
+                    Debug.WriteLine($"string length is {nextStringLength}");
+                    if (nextStringLength < 0) { buffer = new byte[-nextStringLength]; int count = 0;  while (count < Math.Abs(nextStringLength)) { buffer[count] = readerUTF16.ReadByte(); readerUTF16.BaseStream.Position++; count++; Debug.WriteLine($"count is: {count}"); }  foreach (byte b in buffer) { mapOptions += (char)b; } Debug.WriteLine(Pos16()); }
+                    if (nextStringLength > 0) { buffer = readerUTF8.ReadBytes(nextStringLength); foreach (byte b in buffer) { mapOptions += (char)b; Debug.WriteLine(Pos8()); }}
+                    if (nextStringLength == 0) { mapOptions = ""; inputStream.Position += nextStringLength; }
+
+                    string sessionID = "";
+                    nextStringLength = readerUTF16.ReadInt32();
+                    Debug.WriteLine($"string length is {nextStringLength}");
+                    if (nextStringLength < 0) { buffer = new byte[-nextStringLength]; int count = 0; while (count < Math.Abs(nextStringLength)) { buffer[count] = readerUTF16.ReadByte(); readerUTF16.BaseStream.Position++; count++; } foreach (byte b in buffer) { sessionID += (char)b; } }
+                    if (nextStringLength > 0) { buffer = readerUTF8.ReadBytes(nextStringLength); foreach (byte b in buffer) { sessionID += (char)b; } }
+                    if (nextStringLength == 0) { sessionID = ""; inputStream.Position += nextStringLength; }
+
+                    int playedSeconds = readerUTF16.ReadInt32();
+                    long tickTimeStamp = readerUTF16.ReadInt64();
+                    byte sessionVisibility = readerUTF16.ReadByte();
+                    int unrealVersion = readerUTF16.ReadInt32();
+
+                    Debug.WriteLine(Pos16());
+                    string modMetaData = "";
+                    nextStringLength = readerUTF16.ReadInt32();
+                    Debug.WriteLine($"string length is {nextStringLength}");
+                    buffer = readerUTF16.ReadBytes(nextStringLength);
+                    foreach (byte b in buffer) { modMetaData += (char)b; }
+
+                    int modFlags = readerUTF16.ReadInt32();
+
+                    Debug.WriteLine($"Header version is: {headerVersion}");
+                    Debug.WriteLine($"Save version is: {saveVersion}");
+                    Debug.WriteLine($"Build version is: {buildVersion}");
+                    Debug.WriteLine($"Map name is: {mapName}");
+                    Debug.WriteLine($"Map Options are: {mapOptions}");
+                    Debug.WriteLine($"Session ID is: {sessionID}");
+                    Debug.WriteLine($"Played seconds: {playedSeconds}");
+                    Debug.WriteLine($"Tick timestamp is: {tickTimeStamp}");
+                    Debug.WriteLine($"Session visibility is: {sessionVisibility}");
+                    Debug.WriteLine($"Mod metadata is: {modMetaData}");
+                    Debug.WriteLine($"modded?: {modFlags}");
                 }
-                Debug.WriteLine($"stopped after {count * 2} bytes");
             }
-            inputStream.Close();
         }
     }
 }
