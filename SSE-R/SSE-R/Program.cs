@@ -4,7 +4,8 @@
     {
         static void Main(string[] args)
         {
-            string inputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Outputs", "Zlib" ,"input.sav");
+            // set input file and output directory, specific output file is specified within the functions
+            string inputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Outputs", "Zlib" ,"input1.sav");
             string outputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Outputs", "Zlib");
 
             Parser p = new();

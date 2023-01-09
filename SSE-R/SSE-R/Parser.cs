@@ -1,23 +1,19 @@
 ﻿using System.Diagnostics;
-using System.Drawing.Text;
 using System.IO.Compression;
-using System.Net;
-using System.Reflection.PortableExecutable;
 using System.Text;
-using Windows.Devices.PointOfService;
-using Windows.Media.Playback;
-using Windows.Storage.Streams;
 
 namespace SSE_R
 {
     public class Parser
     {
+        // decompresses chunks and writes the data to an output file
         public void ParseBody(string inputPath, string outputPath)
         {
             using (FileStream inputStream = new(inputPath, FileMode.Open, FileAccess.Read))
             {
                 using (BinaryReader r = new(inputStream, Encoding.Unicode, true))
                 {
+                    // initialising variables
                     int count = 0;
                     long outputPosition = 0;
                     bool foundStart = false;
@@ -25,15 +21,17 @@ namespace SSE_R
                     int b = 0;
                     inputStream.Position = 0;
                     int outputSize = 0;
+                    // loops through all the chunks, stopping when the catch is triggered
                     while (true)
                     {
                         while (!foundStart)
                         {
+                            // catches System.IO.EndOfStreamException to close the stream and write debug data when the end is reached
                             try
                             {
                                 b = r.ReadByte();
                             }
-                            catch (EndOfStreamException ex)
+                            catch (EndOfStreamException)
                             {
                                 Debug.WriteLine("Reached the end of the stream");
                                 Debug.WriteLine(count, "count");
@@ -41,7 +39,7 @@ namespace SSE_R
                                 Debug.WriteLine(outputSize, "body.txt size in bytes should be ");
                                 return;
                             }
-
+                            // find location of the chunk header, finds the length of the chunk and moves the stream to the beginning of the compressed data
                             if (b == 0xC1)
                             {
                                 b = r.ReadByte();
@@ -54,10 +52,8 @@ namespace SSE_R
                                         if (b == 0x9E)
                                         {
                                             foundStart = true;
-                                            Debug.WriteLine(r.BaseStream.Position, "chunkposition: ");
                                             r.BaseStream.Seek(20, SeekOrigin.Current);
                                             nextChunkSize = r.ReadInt32();
-                                            Debug.WriteLine(nextChunkSize, "next chunk size: ");
                                             r.BaseStream.Seek(22, SeekOrigin.Current);
                                             inputStream.Position = r.BaseStream.Position;
                                             outputSize += nextChunkSize;
@@ -66,19 +62,16 @@ namespace SSE_R
                                 }
                             }
                         }
-
+                        // decompresses the chunk body using the nextChunkSize variable as the amount of bytes that are read
                         using (FileStream outputStream = File.Create(Path.Combine(outputPath, "Body.txt")))
                         {
                             using (DeflateStream d = new(inputStream, CompressionMode.Decompress, true))
                             {
-                                Debug.WriteLine(inputStream.Position, "decomp position");
                                 byte[] buffer = new byte[nextChunkSize];
                                 d.Read(buffer, 0, nextChunkSize);
                                 outputStream.Position = outputPosition;
                                 outputStream.Write(buffer, 0, nextChunkSize);
-                                Debug.WriteLine($"successfully decompressed chunk {count}");
                                 foundStart = false;
-                                outputStream.WriteByte(0x0A);
                             }
                         }
                         count++;
@@ -97,14 +90,6 @@ namespace SSE_R
                     BinaryReader readerUTF16 = new(inputStream, Encoding.Default);
                     BinaryReader readerUTF8 = new(inputStream, Encoding.UTF8);
 
-                    long Pos16()
-                    {
-                       return readerUTF16.BaseStream.Position;
-                    }
-                    long Pos8()
-                    {
-                        return readerUTF8.BaseStream.Position;
-                    }
                     // set up variables for reading strings
                     int nextStringLength;
                     byte[] buffer = new byte[1000000];
@@ -122,7 +107,7 @@ namespace SSE_R
                     string mapOptions = "";
                     nextStringLength = readerUTF16.ReadInt32();
                     if (nextStringLength < 0) { buffer = new byte[-nextStringLength]; int count = 0;  while (count < Math.Abs(nextStringLength)) { buffer[count] = readerUTF16.ReadByte(); readerUTF16.BaseStream.Position++; count++; } foreach (byte b in buffer) { mapOptions += (char)b; } }
-                    if (nextStringLength > 0) { buffer = readerUTF8.ReadBytes(nextStringLength); foreach (byte b in buffer) { mapOptions += (char)b; Debug.WriteLine(Pos8()); }}
+                    if (nextStringLength > 0) { buffer = readerUTF8.ReadBytes(nextStringLength); foreach (byte b in buffer) { mapOptions += (char)b; }}
                     if (nextStringLength == 0) { mapOptions = ""; inputStream.Position += nextStringLength; }
 
                     string sessionID = "";
@@ -142,7 +127,7 @@ namespace SSE_R
                     foreach (byte b in buffer) { modMetaData += (char)b; }
 
                     int modFlags = readerUTF16.ReadInt32();
-
+                    // writes all the data gathered from the chunk header to the output file
                     using (BinaryWriter writer = new(outputStream, Encoding.Default))
                     {
                         writer.Write(headerVersion);
