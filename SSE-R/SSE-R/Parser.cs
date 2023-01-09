@@ -2,9 +2,11 @@
 using System.Drawing.Text;
 using System.IO.Compression;
 using System.Net;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using Windows.Devices.PointOfService;
 using Windows.Media.Playback;
+using Windows.Storage.Streams;
 
 namespace SSE_R
 {
@@ -12,62 +14,78 @@ namespace SSE_R
     {
         public void ParseBody(string inputPath, string outputPath)
         {
-            long outputPosition = 0;
-            int count = 0;
-            FileStream inputStream = File.OpenRead(inputPath);
-            Debug.WriteLine(inputStream.Length);
-            while (inputStream.Position < inputStream.Length)
+            using (FileStream inputStream = new(inputPath, FileMode.Open, FileAccess.Read))
             {
-                bool foundStart = false;
-                while (!foundStart)
+                using (BinaryReader r = new(inputStream, Encoding.Unicode, true))
                 {
-                    int b = inputStream.ReadByte();
-                    if (b == -1)
+                    int count = 0;
+                    long outputPosition = 0;
+                    bool foundStart = false;
+                    int nextChunkSize = 0;
+                    int b = 0;
+                    inputStream.Position = 0;
+                    int outputSize = 0;
+                    while (true)
                     {
-                        inputStream.Close();
-                        return;
-                    }
-                    if (b == 0x78)
-                    {
-                        b = inputStream.ReadByte();
-                        if (b == 0x9c)
+                        while (!foundStart)
                         {
-                            Debug.WriteLine($"Found chunk start at {inputStream.Position}");
-                            foundStart = true;
+                            try
+                            {
+                                b = r.ReadByte();
+                            }
+                            catch (EndOfStreamException ex)
+                            {
+                                Debug.WriteLine("Reached the end of the stream");
+                                Debug.WriteLine(count, "count");
+                                Debug.WriteLine(nextChunkSize, "last chunk size = ");
+                                Debug.WriteLine(outputSize, "body.txt size in bytes should be ");
+                                return;
+                            }
+
+                            if (b == 0xC1)
+                            {
+                                b = r.ReadByte();
+                                if (b == 0x83)
+                                {
+                                    b = r.ReadByte();
+                                    if (b == 0x2A)
+                                    {
+                                        b = r.ReadByte();
+                                        if (b == 0x9E)
+                                        {
+                                            foundStart = true;
+                                            Debug.WriteLine(r.BaseStream.Position, "chunkposition: ");
+                                            r.BaseStream.Seek(20, SeekOrigin.Current);
+                                            nextChunkSize = r.ReadInt32();
+                                            Debug.WriteLine(nextChunkSize, "next chunk size: ");
+                                            r.BaseStream.Seek(22, SeekOrigin.Current);
+                                            inputStream.Position = r.BaseStream.Position;
+                                            outputSize += nextChunkSize;
+                                        }
+                                    }
+                                }
+                            }
                         }
-                    }
-                }
-                if (foundStart)
-                {
-                    using (FileStream outputStream = File.Create(Path.Combine(outputPath, "Body.txt")))
-                    {
-                        using (DeflateStream decompressionStream = new(inputStream, CompressionMode.Decompress, true))
+
+                        using (FileStream outputStream = File.Create(Path.Combine(outputPath, "Body.txt")))
                         {
-                            if (!decompressionStream.CanRead)
+                            using (DeflateStream d = new(inputStream, CompressionMode.Decompress, true))
                             {
-                                throw new Exception("cant read from decompressionstream");
-                            }
-                            else if (!outputStream.CanWrite)
-                            {
-                                throw new Exception("cant write to output.txt");
-                            }
-                            if (outputStream.CanWrite && decompressionStream.CanRead)
-                            {
+                                Debug.WriteLine(inputStream.Position, "decomp position");
+                                byte[] buffer = new byte[nextChunkSize];
+                                d.Read(buffer, 0, nextChunkSize);
                                 outputStream.Position = outputPosition;
-                                byte[] buffer = new byte[131072];
-                                int bytesread = decompressionStream.Read(buffer, 0, 131072);
-                                outputStream.Write(buffer, 0, 131072);
+                                outputStream.Write(buffer, 0, nextChunkSize);
+                                Debug.WriteLine($"successfully decompressed chunk {count}");
                                 foundStart = false;
-                                inputStream.Position += bytesread;
-                                outputPosition = outputStream.Position;
-                                count++;
+                                outputStream.WriteByte(0x0A);
                             }
                         }
+                        count++;
+                        outputPosition += nextChunkSize;
                     }
                 }
             }
-            inputStream.Close();
-            Debug.WriteLine($"decompressed {count} chunks");
         }
         public void ParseHeader(string inputPath, string outputPath)
         {
@@ -95,25 +113,20 @@ namespace SSE_R
                     int headerVersion = readerUTF16.ReadInt32(); 
                     int saveVersion = readerUTF16.ReadInt32();
                     int buildVersion = readerUTF16.ReadInt32();
-                    Debug.WriteLine(Pos16());
 
                     string mapName = "";
                     nextStringLength = readerUTF16.ReadInt32();
-                    Debug.WriteLine($"string length is {nextStringLength}");
                     buffer = readerUTF16.ReadBytes(nextStringLength);
                     foreach(byte b in buffer) { mapName += (char)b; }
-                    Debug.WriteLine(Pos16());
 
                     string mapOptions = "";
                     nextStringLength = readerUTF16.ReadInt32();
-                    Debug.WriteLine($"string length is {nextStringLength}");
-                    if (nextStringLength < 0) { buffer = new byte[-nextStringLength]; int count = 0;  while (count < Math.Abs(nextStringLength)) { buffer[count] = readerUTF16.ReadByte(); readerUTF16.BaseStream.Position++; count++; Debug.WriteLine($"count is: {count}"); }  foreach (byte b in buffer) { mapOptions += (char)b; } Debug.WriteLine(Pos16()); }
+                    if (nextStringLength < 0) { buffer = new byte[-nextStringLength]; int count = 0;  while (count < Math.Abs(nextStringLength)) { buffer[count] = readerUTF16.ReadByte(); readerUTF16.BaseStream.Position++; count++; } foreach (byte b in buffer) { mapOptions += (char)b; } }
                     if (nextStringLength > 0) { buffer = readerUTF8.ReadBytes(nextStringLength); foreach (byte b in buffer) { mapOptions += (char)b; Debug.WriteLine(Pos8()); }}
                     if (nextStringLength == 0) { mapOptions = ""; inputStream.Position += nextStringLength; }
 
                     string sessionID = "";
                     nextStringLength = readerUTF16.ReadInt32();
-                    Debug.WriteLine($"string length is {nextStringLength}");
                     if (nextStringLength < 0) { buffer = new byte[-nextStringLength]; int count = 0; while (count < Math.Abs(nextStringLength)) { buffer[count] = readerUTF16.ReadByte(); readerUTF16.BaseStream.Position++; count++; } foreach (byte b in buffer) { sessionID += (char)b; } }
                     if (nextStringLength > 0) { buffer = readerUTF8.ReadBytes(nextStringLength); foreach (byte b in buffer) { sessionID += (char)b; } }
                     if (nextStringLength == 0) { sessionID = ""; inputStream.Position += nextStringLength; }
@@ -123,26 +136,28 @@ namespace SSE_R
                     byte sessionVisibility = readerUTF16.ReadByte();
                     int unrealVersion = readerUTF16.ReadInt32();
 
-                    Debug.WriteLine(Pos16());
                     string modMetaData = "";
                     nextStringLength = readerUTF16.ReadInt32();
-                    Debug.WriteLine($"string length is {nextStringLength}");
                     buffer = readerUTF16.ReadBytes(nextStringLength);
                     foreach (byte b in buffer) { modMetaData += (char)b; }
 
                     int modFlags = readerUTF16.ReadInt32();
 
-                    Debug.WriteLine($"Header version is: {headerVersion}");
-                    Debug.WriteLine($"Save version is: {saveVersion}");
-                    Debug.WriteLine($"Build version is: {buildVersion}");
-                    Debug.WriteLine($"Map name is: {mapName}");
-                    Debug.WriteLine($"Map Options are: {mapOptions}");
-                    Debug.WriteLine($"Session ID is: {sessionID}");
-                    Debug.WriteLine($"Played seconds: {playedSeconds}");
-                    Debug.WriteLine($"Tick timestamp is: {tickTimeStamp}");
-                    Debug.WriteLine($"Session visibility is: {sessionVisibility}");
-                    Debug.WriteLine($"Mod metadata is: {modMetaData}");
-                    Debug.WriteLine($"modded?: {modFlags}");
+                    using (BinaryWriter writer = new(outputStream, Encoding.Default))
+                    {
+                        writer.Write(headerVersion);
+                        writer.Write(saveVersion);
+                        writer.Write(buildVersion);
+                        writer.Write(mapName);
+                        writer.Write(mapOptions);
+                        writer.Write(sessionID);
+                        writer.Write(playedSeconds);
+                        writer.Write(tickTimeStamp);
+                        writer.Write(sessionVisibility);
+                        writer.Write(unrealVersion);
+                        writer.Write(modMetaData);
+                        writer.Write(modFlags);
+                    }
                 }
             }
         }
