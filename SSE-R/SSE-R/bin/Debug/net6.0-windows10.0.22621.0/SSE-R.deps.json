@@ -8,21 +8,21 @@
     ".NETCoreApp,Version=v6.0": {
       "SSE-R/1.0.0": {
         "dependencies": {
-          "runtimepack.Microsoft.Windows.SDK.NET.Ref": "10.0.22621.27"
+          "runtimepack.Microsoft.Windows.SDK.NET.Ref": "10.0.22621.28"
         },
         "runtime": {
           "SSE-R.dll": {}
         }
       },
-      "runtimepack.Microsoft.Windows.SDK.NET.Ref/10.0.22621.27": {
+      "runtimepack.Microsoft.Windows.SDK.NET.Ref/10.0.22621.28": {
         "runtime": {
           "Microsoft.Windows.SDK.NET.dll": {
             "assemblyVersion": "10.0.22621.24",
-            "fileVersion": "10.0.22621.27"
+            "fileVersion": "10.0.22621.28"
           },
           "WinRT.Runtime.dll": {
             "assemblyVersion": "2.0.0.0",
-            "fileVersion": "2.0.0.39961"
+            "fileVersion": "2.0.1.40881"
           }
         }
       }
@@ -34,7 +34,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "runtimepack.Microsoft.Windows.SDK.NET.Ref/10.0.22621.27": {
+    "runtimepack.Microsoft.Windows.SDK.NET.Ref/10.0.22621.28": {
       "type": "runtimepack",
       "serviceable": false,
       "sha512": ""

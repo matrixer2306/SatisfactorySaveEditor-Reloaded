@@ -16,3 +16,5 @@ C:\Users\gerha\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\
 C:\Users\gerha\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.pdb
 C:\Users\gerha\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.genruntimeconfig.cache
 C:\Users\gerha\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\ref\SSE-R.dll
+C:\Users\gerha\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE_R.Form1.resources
+C:\Users\gerha\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.csproj.GenerateResource.cache
