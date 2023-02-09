@@ -1,4 +1,6 @@
-﻿namespace SSE_R
+﻿using System.Diagnostics;
+
+namespace SSE_R
 {
     internal class Program
     {
@@ -9,8 +11,8 @@
             string outputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Outputs", "Zlib");
 
             Parser p = new();
-            p.ParseHeader(inputPath, outputPath);
-            p.ParseBody(inputPath, outputPath);
+            MemoryStream Header = p.ParseHeader(inputPath, outputPath);
+            MemoryStream Body = p.ParseBody(inputPath, outputPath);
         }
     }
 }

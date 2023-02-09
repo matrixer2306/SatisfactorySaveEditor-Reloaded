@@ -8,10 +8,11 @@ namespace SSE_R
     public class Parser
     {
         // decompresses chunks and writes the data to an output file
-        public void ParseBody(string inputPath, string outputPath)
+        public MemoryStream ParseBody(string inputPath, string outputPath)
         {
             FileStream inputStream = new(inputPath, FileMode.Open);
-            FileStream outputStream = File.Create(Path.Combine(outputPath, "Body.bin"));
+            //FileStream outputStream = File.Create(Path.Combine(outputPath, "Body.bin"));
+            MemoryStream outputStream = new MemoryStream();
 
             byte[] buffer = new byte[4];
             bool foundStart = false;
@@ -35,7 +36,7 @@ namespace SSE_R
                     switch (b)
                     {
                         case -1:
-                            Debug.WriteLine($"Input stream length is {inputStream.Length}\n Read {totalBytesRead} bytes from {chunkCount} chunks.");
+                            Debug.WriteLine($"Input stream length is {inputStream.Length/1000} kb or {inputStream.Length / 1024} kib \n Read {totalBytesRead/1000} kb or {totalBytesRead/1024} kib from {chunkCount} chunks.");
                             if (totalBytesRead < combinedChunkLength)
                             {
                                 Debug.WriteLine($"Should have written {combinedChunkLength} bytes, was off by {combinedChunkLength - totalBytesRead}");
@@ -47,7 +48,7 @@ namespace SSE_R
                             }
                             catch (Exception)
                             {
-                                return;
+                                return outputStream;
                             }
                         case 0xC1:
                             b = inputStream.ReadByte();
@@ -109,7 +110,7 @@ namespace SSE_R
             }
         }
         
-        public void ParseHeader(string inputPath, string outputPath)
+        public MemoryStream ParseHeader(string inputPath, string outputPath)
         {
             using (FileStream inputStream = File.OpenRead(inputPath))
             {
@@ -118,44 +119,60 @@ namespace SSE_R
                     // set up readers for different encodings
                     BinaryReader readerUTF16 = new(inputStream, Encoding.Default);
                     BinaryReader readerUTF8 = new(inputStream, Encoding.UTF8);
+                    MemoryStream header = new MemoryStream();
+                    int headerLength = 0;
 
                     // set up variables for reading strings
                     int nextStringLength;
                     byte[] buffer = new byte[1000000];
 
                     // reading of variables
-                    int headerVersion = readerUTF16.ReadInt32(); 
+                    int headerVersion = readerUTF16.ReadInt32();
+                    headerLength += 4;
                     int saveVersion = readerUTF16.ReadInt32();
+                    headerLength += 4;
                     int buildVersion = readerUTF16.ReadInt32();
+                    headerLength += 4;
 
                     string mapName = "";
                     nextStringLength = readerUTF16.ReadInt32();
                     buffer = readerUTF16.ReadBytes(nextStringLength);
                     foreach(byte b in buffer) { mapName += (char)b; }
+                    headerLength += nextStringLength;
 
                     string mapOptions = "";
                     nextStringLength = readerUTF16.ReadInt32();
                     if (nextStringLength < 0) { buffer = new byte[-nextStringLength]; int count = 0;  while (count < Math.Abs(nextStringLength)) { buffer[count] = readerUTF16.ReadByte(); readerUTF16.BaseStream.Position++; count++; } foreach (byte b in buffer) { mapOptions += (char)b; } }
                     if (nextStringLength > 0) { buffer = readerUTF8.ReadBytes(nextStringLength); foreach (byte b in buffer) { mapOptions += (char)b; }}
                     if (nextStringLength == 0) { mapOptions = ""; inputStream.Position += nextStringLength; }
+                    headerLength += nextStringLength;
 
                     string sessionID = "";
                     nextStringLength = readerUTF16.ReadInt32();
                     if (nextStringLength < 0) { buffer = new byte[-nextStringLength]; int count = 0; while (count < Math.Abs(nextStringLength)) { buffer[count] = readerUTF16.ReadByte(); readerUTF16.BaseStream.Position++; count++; } foreach (byte b in buffer) { sessionID += (char)b; } }
                     if (nextStringLength > 0) { buffer = readerUTF8.ReadBytes(nextStringLength); foreach (byte b in buffer) { sessionID += (char)b; } }
                     if (nextStringLength == 0) { sessionID = ""; inputStream.Position += nextStringLength; }
+                    headerLength += nextStringLength;
 
                     int playedSeconds = readerUTF16.ReadInt32();
+                    headerLength += 4;
                     long tickTimeStamp = readerUTF16.ReadInt64();
+                    headerLength += 4;
                     byte sessionVisibility = readerUTF16.ReadByte();
+                    headerLength += 1;
                     int unrealVersion = readerUTF16.ReadInt32();
+                    headerLength += 4;
 
                     string modMetaData = "";
                     nextStringLength = readerUTF16.ReadInt32();
+                    Debug.WriteLine($"modmetadata is {nextStringLength} bytes long");
+                    buffer = new byte[nextStringLength];
                     buffer = readerUTF16.ReadBytes(nextStringLength);
-                    foreach (byte b in buffer) { modMetaData += (char)b; }
+                    foreach (byte b in buffer) { modMetaData += b; }
+                    headerLength += nextStringLength;
 
                     int modFlags = readerUTF16.ReadInt32();
+                    headerLength += 4;
                     // writes all the data gathered from the chunk header to the output file
                     using (BinaryWriter writer = new(outputStream, Encoding.Default))
                     {
@@ -181,9 +198,14 @@ namespace SSE_R
                         writer.Write($"Tick timestamp = {tickTimeStamp}\n");
                         writer.Write($"Session visibility = {sessionVisibility}\n");
                         writer.Write($"unrealVersion = {unrealVersion}\n");
-                        writer.Write($"modMetaData: {modMetaData}\n");
+                        if (modMetaData.Length != 0)
+                        {
+                            writer.Write($"modMetaData: {modMetaData}\n");
+                        }
                         writer.Write($"modFlags: {modFlags}\n");
                     }
+                    inputStream.CopyTo(header, headerLength);
+                    return header;
                 }
             }
         }
