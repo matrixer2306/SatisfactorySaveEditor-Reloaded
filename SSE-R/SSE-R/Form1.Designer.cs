@@ -1,6 +1,6 @@
 ﻿namespace SSE_R
 {
-    partial class Form1
+    public partial class Form1
     {
         /// <summary>
         /// Required designer variable.

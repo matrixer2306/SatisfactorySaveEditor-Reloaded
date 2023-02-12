@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\gerha\\Documents\\GitHub\\SatisfactorySaveEditor-Reloaded\\SSE-R\\SSE-R\\SSE-R.csproj": {}
+    "C:\\Users\\Joël\\Documents\\GitHub\\SatisfactorySaveEditor-Reloaded\\SSE-R\\SSE-R\\SSE-R.csproj": {}
   },
   "projects": {
-    "C:\\Users\\gerha\\Documents\\GitHub\\SatisfactorySaveEditor-Reloaded\\SSE-R\\SSE-R\\SSE-R.csproj": {
+    "C:\\Users\\Joël\\Documents\\GitHub\\SatisfactorySaveEditor-Reloaded\\SSE-R\\SSE-R\\SSE-R.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\gerha\\Documents\\GitHub\\SatisfactorySaveEditor-Reloaded\\SSE-R\\SSE-R\\SSE-R.csproj",
+        "projectUniqueName": "C:\\Users\\Joël\\Documents\\GitHub\\SatisfactorySaveEditor-Reloaded\\SSE-R\\SSE-R\\SSE-R.csproj",
         "projectName": "SSE-R",
-        "projectPath": "C:\\Users\\gerha\\Documents\\GitHub\\SatisfactorySaveEditor-Reloaded\\SSE-R\\SSE-R\\SSE-R.csproj",
-        "packagesPath": "C:\\Users\\gerha\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\gerha\\Documents\\GitHub\\SatisfactorySaveEditor-Reloaded\\SSE-R\\SSE-R\\obj\\",
+        "projectPath": "C:\\Users\\Joël\\Documents\\GitHub\\SatisfactorySaveEditor-Reloaded\\SSE-R\\SSE-R\\SSE-R.csproj",
+        "packagesPath": "C:\\Users\\Joël\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Joël\\Documents\\GitHub\\SatisfactorySaveEditor-Reloaded\\SSE-R\\SSE-R\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\gerha\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Joël\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],

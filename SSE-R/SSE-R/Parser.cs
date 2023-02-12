@@ -164,31 +164,44 @@ namespace SSE_R
                     headerLength += 4;
 
                     string modMetaData = "";
-                    nextStringLength = readerUTF16.ReadInt32();
-                    Debug.WriteLine($"modmetadata is {nextStringLength} bytes long");
-                    buffer = new byte[nextStringLength];
-                    buffer = readerUTF16.ReadBytes(nextStringLength);
-                    foreach (byte b in buffer) { modMetaData += b; }
-                    headerLength += nextStringLength;
+                    if (headerVersion >= 8)
+                    {
+                        nextStringLength = readerUTF16.ReadInt32();
+                        Debug.WriteLine($"modmetadata is {nextStringLength} bytes long");
+                        buffer = new byte[nextStringLength];
+                        buffer = readerUTF16.ReadBytes(nextStringLength);
+                        foreach (byte b in buffer)
+                        {
+                            modMetaData += (char)b;
+                        }
+                        headerLength += nextStringLength;
+                    }
+                    else
+                    {
+                        modMetaData = "Modmetadata only exists in header version 8 or above";
+                    }
 
                     int modFlags = readerUTF16.ReadInt32();
                     headerLength += 4;
                     // writes all the data gathered from the chunk header to the output file
-                    using (BinaryWriter writer = new(outputStream, Encoding.Default))
+                    using (BinaryWriter writer = new(outputStream, Encoding.ASCII))
                     {
-                        Debug.WriteLine(headerVersion);
-                        Debug.WriteLine(saveVersion);
-                        Debug.WriteLine(buildVersion);
-                        Debug.WriteLine(mapName);
-                        Debug.WriteLine(mapOptions);
-                        Debug.WriteLine(sessionID);
-                        Debug.WriteLine(playedSeconds);
-                        Debug.WriteLine(tickTimeStamp);
-                        Debug.WriteLine(sessionVisibility);
-                        Debug.WriteLine(unrealVersion);
-                        Debug.WriteLine(modMetaData);
-                        Debug.WriteLine(modFlags);
-
+                        Debug.Write($"Header version = {headerVersion}\n");
+                        Debug.Write($"Save version = {saveVersion}\n");
+                        Debug.Write($"Build version = {buildVersion}\n");
+                        Debug.Write($"Map name = {mapName}\n");
+                        Debug.Write($"Map options string: {mapOptions}\n");
+                        Debug.Write($"Playtime in seconds = {playedSeconds}\n");
+                        Debug.Write($"Tick timestamp = {tickTimeStamp}\n");
+                        Debug.Write($"Session visibility = {sessionVisibility}\n");
+                        Debug.Write($"unrealVersion = {unrealVersion}\n");
+                        if (modMetaData.Length != 0)
+                        {
+                            Debug.Write($"modMetaData: {modMetaData}\n");
+                        }
+                        else { Debug.Write("There is no modMetaData\n"); }
+                        Debug.Write($"modFlags: {modFlags}\n");
+                        
                         writer.Write($"Header version = {headerVersion}\n");
                         writer.Write($"Save version = {saveVersion}\n");
                         writer.Write($"Build version = {buildVersion}\n");
@@ -202,6 +215,7 @@ namespace SSE_R
                         {
                             writer.Write($"modMetaData: {modMetaData}\n");
                         }
+                        else { writer.Write("There is no modMetaData\n"); }
                         writer.Write($"modFlags: {modFlags}\n");
                     }
                     inputStream.CopyTo(header, headerLength);
