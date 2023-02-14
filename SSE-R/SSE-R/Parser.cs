@@ -218,6 +218,20 @@ namespace SSE_R
                         else { writer.Write("There is no modMetaData\n"); }
                         writer.Write($"modFlags: {modFlags}\n");
                     }
+                    try
+                    {
+                        if (saveVersion < 29)
+                        {
+                            throw new Exception("VersionUnsupportedException: your save file is of version 28 or lower, and is not supported, please open the game, and overwrite the save to fix this issue");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.Message, "invalid save version", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly | MessageBoxOptions.ServiceNotification, false);
+
+                        Environment.Exit(0);
+                    }
+
                     inputStream.CopyTo(header, headerLength);
                     return header;
                 }

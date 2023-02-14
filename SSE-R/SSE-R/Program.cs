@@ -35,6 +35,9 @@ namespace SSE_R
                 Parser p = new Parser();
                 MemoryStream header = p.ParseHeader(inputPath, outputPath);
                 MemoryStream body = p.ParseBody(inputPath, outputPath);
+                LevelSorter l = new LevelSorter();
+                List<int> offsets = l.GetOffsets(body);
+                Debug.WriteLine($"found {offsets.Count} offsets");
             }
         }
     }
