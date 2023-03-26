@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
-
+using Windows.Devices.Power;
 
 namespace SSE_R
 {
@@ -109,7 +109,7 @@ namespace SSE_R
                 }
             }
         }
-
+        
         public MemoryStream ParseHeader(string inputPath, string outputPath)
         {
             using (FileStream inputStream = File.OpenRead(inputPath))
@@ -228,6 +228,7 @@ namespace SSE_R
                     catch (Exception e)
                     {
                         MessageBox.Show(e.Message, "invalid save version", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly | MessageBoxOptions.ServiceNotification, false);
+
                         Environment.Exit(0);
                     }
 
