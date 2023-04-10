@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
+using static SSE_R.misc.LogFile;
 
 namespace SSE_R
 {
@@ -180,22 +181,23 @@ namespace SSE_R
                     // writes all the data gathered from the chunk header to the output file
                     using (BinaryWriter writer = new(outputStream, Encoding.ASCII))
                     {
-                        Debug.Write($"Header version = {headerVersion}\n");
-                        Debug.Write($"Save version = {saveVersion}\n");
-                        Debug.Write($"Build version = {buildVersion}\n");
-                        Debug.Write($"Map name = {mapName}\n");
-                        Debug.Write($"Map options string: {mapOptions}\n");
-                        Debug.Write($"Session id = {sessionID}\n");
-                        Debug.Write($"Playtime in seconds = {playedSeconds}\n");
-                        Debug.Write($"Tick timestamp = {tickTimeStamp}\n");
-                        Debug.Write($"Session visibility = {sessionVisibility}\n");
-                        Debug.Write($"unrealVersion = {unrealVersion}\n");
+                        
+                        AddLogEntry($"Header version = {headerVersion}\n");
+                        AddLogEntry($"Save version = {saveVersion}\n");
+                        AddLogEntry($"Build version = {buildVersion}\n");
+                        AddLogEntry($"Map name = {mapName}\n");
+                        AddLogEntry($"Map options string: {mapOptions}\n");
+                        AddLogEntry($"Session id = {sessionID}\n");
+                        AddLogEntry($"Playtime in seconds = {playedSeconds}\n");
+                        AddLogEntry($"Tick timestamp = {tickTimeStamp}\n");
+                        AddLogEntry($"Session visibility = {sessionVisibility}\n");
+                        AddLogEntry($"unrealVersion = {unrealVersion}\n");
                         if (modMetaData.Length != 0)
                         {
-                            Debug.Write($"modMetaData: {modMetaData}\n");
+                            AddLogEntry($"modMetaData: {modMetaData}\n");
                         }
-                        else { Debug.Write("There is no modMetaData\n"); }
-                        Debug.Write($"modFlags: {modFlags}\n");
+                        else { AddLogEntry("There is no modMetaData\n"); }
+                        AddLogEntry($"modFlags: {modFlags}\n");
 
                         writer.Write($"Header version = {headerVersion}\n");
                         writer.Write($"Save version = {saveVersion}\n");

@@ -34,6 +34,7 @@
             treeView2 = new TreeView();
             toolStrip1 = new ToolStrip();
             toolStripButton1 = new ToolStripButton();
+            toolStripButton2 = new ToolStripButton();
             flowLayoutPanel1 = new FlowLayoutPanel();
             tableLayoutPanel1.SuspendLayout();
             toolStrip1.SuspendLayout();
@@ -88,7 +89,7 @@
             tableLayoutPanel1.SetColumnSpan(toolStrip1, 2);
             toolStrip1.Dock = DockStyle.Fill;
             toolStrip1.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1 });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1, toolStripButton2 });
             toolStrip1.Location = new Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.RenderMode = ToolStripRenderMode.System;
@@ -107,6 +108,19 @@
             toolStripButton1.Text = "open save";
             toolStripButton1.TextImageRelation = TextImageRelation.ImageAboveText;
             toolStripButton1.Click += toolStripButton1_Click;
+            // 
+            // toolStripButton2
+            // 
+            toolStripButton2.Alignment = ToolStripItemAlignment.Right;
+            toolStripButton2.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            toolStripButton2.Image = (Image)resources.GetObject("toolStripButton2.Image");
+            toolStripButton2.ImageAlign = ContentAlignment.BottomCenter;
+            toolStripButton2.ImageTransparentColor = Color.Magenta;
+            toolStripButton2.Name = "toolStripButton2";
+            toolStripButton2.Size = new Size(117, 67);
+            toolStripButton2.Text = "Clear output folder";
+            toolStripButton2.TextImageRelation = TextImageRelation.ImageAboveText;
+            toolStripButton2.Click += toolStripButton2_Click;
             // 
             // flowLayoutPanel1
             // 
@@ -145,5 +159,6 @@
         private ToolStrip toolStrip1;
         private ToolStripButton toolStripButton1;
         private FlowLayoutPanel flowLayoutPanel1;
+        private ToolStripButton toolStripButton2;
     }
 }

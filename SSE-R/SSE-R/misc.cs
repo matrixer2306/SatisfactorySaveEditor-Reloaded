@@ -1,4 +1,7 @@
-﻿namespace SSE_R
+﻿using System.Diagnostics;
+using System.Text;
+
+namespace SSE_R
 {
     public class misc
     {
@@ -22,10 +25,22 @@
                 name = Name;
             }
         }
-        public static class LogFile
+        public class LogFile
         {
-            private static FileStream stream = File.Create(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SSE-R", "Logs", "Log.bin"));
+            public static async Task AddLogEntry(string info)
+            {
+                using (FileStream logFile = File.OpenWrite(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SSE-R", "Logs", "Log.txt")))
+                {
+                    string logPrefix = "[";
+                    logPrefix += DateTime.Now.TimeOfDay.ToString("hh\\:mm\\:ss");
 
+                    string logOut = logPrefix + "] " + info;
+
+                    logFile.Position = logFile.Length;
+                    byte[] logArray = Encoding.ASCII.GetBytes(logOut);
+                    await logFile.WriteAsync(logArray, 0, logArray.Length);
+                }
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using static SSE_R.misc;
+using static SSE_R.misc.LogFile;
 
 namespace SSE_R
 {
@@ -21,10 +22,6 @@ namespace SSE_R
         {
             OpenFileDialog filePicker = new OpenFileDialog();
             string appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
-            if (!File.Exists(Path.Combine(appDataFolder, "SSE-R")))
-            {
-                Directory.CreateDirectory(Path.Combine(appDataFolder, "SSE-R"));
-            }
             string inputPath = "";
             string outputPath = Path.Combine(appDataFolder, "SSE-R");
             if (filePicker.ShowDialog() == DialogResult.OK)
@@ -39,24 +36,24 @@ namespace SSE_R
                 form.Show();
                 string saveFileName = "";
                 string formattedDateTime = DateTime.Now.ToString("d-M-yyyy_HH-mm-ss");
-                try
+                //try
+                //{
+                form.Text = "reading header";
+                var headerobj = Parser.ParseHeader(inputPath, outputPath);
+                header = headerobj.Item1;
+                saveFileName = headerobj.Item2;
+                saveFileName = saveFileName.TrimEnd('\0');
+                if (File.Exists(Path.Combine(outputPath, "Header.bin")))
                 {
-                    form.Text = "reading header";
-                    var headerobj = Parser.ParseHeader(inputPath, outputPath);
-                    header = headerobj.Item1;
-                    saveFileName = headerobj.Item2;
-                    saveFileName = saveFileName.TrimEnd('\0');
-                    if (File.Exists(Path.Combine(outputPath, "Header.bin")))
-                    {
-                        File.Move(Path.Combine(outputPath, "Header.bin"), Path.Combine(outputPath, $"{"[HEADER] " + saveFileName + " " + formattedDateTime}.bin"));
-                    }
+                    File.Move(Path.Combine(outputPath, "Header.bin"), Path.Combine(outputPath, $"{"[HEADER] " + saveFileName + " " + formattedDateTime}.bin"));
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "invalid save version", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly | MessageBoxOptions.ServiceNotification, false);
-                    form.Close();
-                    return;
-                }
+                //}
+                //catch (Exception ex)
+                //{
+                //    MessageBox.Show(ex.Message, "invalid save version", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly | MessageBoxOptions.ServiceNotification, false);
+                //    form.Close();
+                //    return;
+                //}
                 form.progressBar1.Value = 10;
                 form.Text = "decompressing body";
                 body = Parser.ParseBody(inputPath, outputPath, $"{"[BODY] " + saveFileName + " " + formattedDateTime}.bin");
@@ -97,6 +94,14 @@ namespace SSE_R
             foreach (TreeNode node in treeView1.SelectedNode.Nodes)
             {
                 treeView2.Nodes.Add(node);
+            }
+        }
+
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            foreach (string file in Directory.GetFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SSE-R"), "*.bin"))
+            {
+                File.Delete(file);
             }
         }
     }

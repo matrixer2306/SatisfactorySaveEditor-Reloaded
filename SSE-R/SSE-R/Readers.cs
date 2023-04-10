@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static SSE_R.Readers;
 using static SSE_R.DataTypes;
+using static SSE_R.misc.LogFile;
 using Microsoft.VisualBasic.Logging;
 using System.Net;
 using System.Diagnostics;

@@ -5,8 +5,20 @@
         [STAThread]
         static void Main(string[] args)
         {
-            // set input file and output directory, specific output file is specified within the functions
+            
             ApplicationConfiguration.Initialize();
+            if (!File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SSE-R")))
+            {
+                Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SSE-R"));
+            }
+            if (!File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SSE-R", "Logs")))
+            {
+                Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SSE-R", "Logs"));
+            }
+            if(File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SSE-R", "Logs", "Log.txt")))
+            {
+                File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SSE-R", "Logs", "Log.txt"));
+            }
             Application.Run(new MainApp());
         }
     }

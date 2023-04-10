@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using static SSE_R.misc.LogFile;
 
 namespace SSE_R
 {
@@ -11,7 +12,7 @@ namespace SSE_R
             decompressedBody.Read(offsetBytes, 0, 4);
             int amountOfOffsets = BitConverter.ToInt32(offsetBytes, 0);
             List<int> offsets = new List<int>();
-            Debug.WriteLine("initiating read");
+            AddLogEntry("initiating read");
             decompressedBody.Position = 0;
             byte[] buffer = new byte[decompressedBody.Length];
             decompressedBody.Read(buffer, 0, buffer.Length);
@@ -37,7 +38,9 @@ namespace SSE_R
                                     if (buffer[index + 6] == target[6])
                                     {
                                         offsets.Add(index);
-                                        Debug.WriteLine("\nfound an offset\n");
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                                        AddLogEntry("\nfound an offset\n");
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                                         index += 6;
                                     }
                                 }
@@ -54,9 +57,9 @@ namespace SSE_R
                     break;
                 }
 
-                Debug.WriteLine($"position is {index} of {buffer.Length}. Found {offsets.Count} offsets so far");
+                AddLogEntry($"position is {index} of {buffer.Length}. Found {offsets.Count} offsets so far");   
             }
-            Debug.WriteLine($"should have found {amountOfOffsets} offsets");
+            AddLogEntry($"should have found {amountOfOffsets} offsets");
             return offsets;
         }
     }

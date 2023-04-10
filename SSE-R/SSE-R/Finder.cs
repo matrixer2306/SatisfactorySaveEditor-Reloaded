@@ -1,4 +1,5 @@
 ﻿using static SSE_R.misc;
+using static SSE_R.misc.LogFile;
 
 namespace SSE_R
 {
