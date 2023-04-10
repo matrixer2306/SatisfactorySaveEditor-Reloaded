@@ -19,13 +19,13 @@ C:\Users\gerha\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\
 C:\Users\gerha\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE_R.Form1.resources
 C:\Users\gerha\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.csproj.GenerateResource.cache
 C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.csproj.AssemblyReference.cache
+C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE_R.Loading.resources
+C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE_R.MainApp.resources
+C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.csproj.GenerateResource.cache
 C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.AssemblyInfoInputs.cache
 C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.AssemblyInfo.cs
 C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.csproj.CoreCompileInputs.cache
-C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.dll
-C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\refint\SSE-R.dll
-C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.pdb
 C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\bin\Debug\net6.0-windows10.0.22621.0\SSE-R.exe
 C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\bin\Debug\net6.0-windows10.0.22621.0\SSE-R.deps.json
 C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\bin\Debug\net6.0-windows10.0.22621.0\SSE-R.runtimeconfig.json
@@ -34,7 +34,8 @@ C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\bin\
 C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\bin\Debug\net6.0-windows10.0.22621.0\Microsoft.Windows.SDK.NET.dll
 C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\bin\Debug\net6.0-windows10.0.22621.0\WinRT.Runtime.dll
 C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.csproj.CopyComplete
+C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.dll
+C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\refint\SSE-R.dll
+C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.pdb
 C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.genruntimeconfig.cache
 C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\ref\SSE-R.dll
-C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE_R.Form1.resources
-C:\Users\Joël\Documents\GitHub\SatisfactorySaveEditor-Reloaded\SSE-R\SSE-R\obj\Debug\net6.0-windows10.0.22621.0\SSE-R.csproj.GenerateResource.cache

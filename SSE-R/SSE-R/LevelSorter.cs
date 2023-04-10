@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.ApplicationModel.Activation;
-using Windows.UI.Popups;
+﻿using System.Diagnostics;
 
 namespace SSE_R
 {
@@ -33,7 +26,7 @@ namespace SSE_R
                 }
                 if (buffer[index + 1] == target[1] && index < buffer.Length - 7)
                 {
-                    if (buffer[index + 2] == target[2]) 
+                    if (buffer[index + 2] == target[2])
                     {
                         if (buffer[index + 3] == target[3])
                         {
@@ -60,7 +53,7 @@ namespace SSE_R
                 {
                     break;
                 }
-                
+
                 Debug.WriteLine($"position is {index} of {buffer.Length}. Found {offsets.Count} offsets so far");
             }
             Debug.WriteLine($"should have found {amountOfOffsets} offsets");

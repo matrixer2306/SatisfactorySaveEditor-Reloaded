@@ -10,4 +10,8 @@
     <StartupObject>SSE_R.Program</StartupObject>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
 </Project>

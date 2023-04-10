@@ -1,14 +1,13 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
-using Windows.Devices.Power;
 
 namespace SSE_R
 {
     public class Parser
     {
         // decompresses chunks and writes the data to an output file
-        public MemoryStream ParseBody(string inputPath, string outputPath)
+        public static MemoryStream ParseBody(string inputPath, string outputPath, string fileName = "body.bin")
         {
             FileStream inputStream = new(inputPath, FileMode.Open);
             //FileStream outputStream = File.Create(Path.Combine(outputPath, "Body.bin"));
@@ -29,18 +28,12 @@ namespace SSE_R
 
             while (true)
             {
-                Debug.WriteLine($"Starting search for C1 83 2A 9E at {inputStream.Position}");
                 while (!foundStart)
                 {
                     var b = inputStream.ReadByte();
                     switch (b)
                     {
                         case -1:
-                            Debug.WriteLine($"Input stream length is {inputStream.Length/1000} kb or {inputStream.Length / 1024} kib \n Read {totalBytesRead/1000} kb or {totalBytesRead/1024} kib from {chunkCount} chunks.");
-                            if (totalBytesRead < combinedChunkLength)
-                            {
-                                Debug.WriteLine($"Should have written {combinedChunkLength} bytes, was off by {combinedChunkLength - totalBytesRead}");
-                            }
                             inputStream.Close();
                             try
                             {
@@ -48,6 +41,10 @@ namespace SSE_R
                             }
                             catch (Exception)
                             {
+                                FileStream outputfile = File.Create(Path.Combine(outputPath, fileName));
+                                outputStream.Position = 0;
+                                outputStream.CopyTo(outputfile);
+                                outputfile.Close();
                                 return outputStream;
                             }
                         case 0xC1:
@@ -76,7 +73,6 @@ namespace SSE_R
                                         combinedChunkLength += decompressedChunkLength;
                                         chunkStart = inputStream.Position;
                                         offsets.Add(chunkStart);
-                                        Debug.WriteLine($"found chunk at {inputStream.Position}");
                                     }
                                 }
                             }
@@ -104,13 +100,12 @@ namespace SSE_R
                     inputStream.Position = chunkStart;
                     foundStart = false;
                     totalBytesRead += bytesread;
-                    Debug.WriteLine($"Writing debug data for chunk {chunkCount}\n Started reading at offset {startposition} and stopped at offset {endposition}\n The first 4 bytes read are {BitConverter.ToString(readData, 0, 4)}\n Started write at offset {writeStart} and stopped at offset {writeEnd}\n Read {bytesread} bytes and wrote {writeEnd - writeStart} bytes\n ");
                     bytesread = 0;
                 }
             }
         }
-        
-        public MemoryStream ParseHeader(string inputPath, string outputPath)
+
+        public static (MemoryStream, string) ParseHeader(string inputPath, string outputPath)
         {
             using (FileStream inputStream = File.OpenRead(inputPath))
             {
@@ -137,13 +132,13 @@ namespace SSE_R
                     string mapName = "";
                     nextStringLength = readerUTF16.ReadInt32();
                     buffer = readerUTF16.ReadBytes(nextStringLength);
-                    foreach(byte b in buffer) { mapName += (char)b; }
+                    foreach (byte b in buffer) { mapName += (char)b; }
                     headerLength += nextStringLength;
 
                     string mapOptions = "";
                     nextStringLength = readerUTF16.ReadInt32();
-                    if (nextStringLength < 0) { buffer = new byte[-nextStringLength]; int count = 0;  while (count < Math.Abs(nextStringLength)) { buffer[count] = readerUTF16.ReadByte(); readerUTF16.BaseStream.Position++; count++; } foreach (byte b in buffer) { mapOptions += (char)b; } }
-                    if (nextStringLength > 0) { buffer = readerUTF8.ReadBytes(nextStringLength); foreach (byte b in buffer) { mapOptions += (char)b; }}
+                    if (nextStringLength < 0) { buffer = new byte[-nextStringLength]; int count = 0; while (count < Math.Abs(nextStringLength)) { buffer[count] = readerUTF16.ReadByte(); readerUTF16.BaseStream.Position++; count++; } foreach (byte b in buffer) { mapOptions += (char)b; } }
+                    if (nextStringLength > 0) { buffer = readerUTF8.ReadBytes(nextStringLength); foreach (byte b in buffer) { mapOptions += (char)b; } }
                     if (nextStringLength == 0) { mapOptions = ""; inputStream.Position += nextStringLength; }
                     headerLength += nextStringLength;
 
@@ -167,7 +162,6 @@ namespace SSE_R
                     if (headerVersion >= 8)
                     {
                         nextStringLength = readerUTF16.ReadInt32();
-                        Debug.WriteLine($"modmetadata is {nextStringLength} bytes long");
                         buffer = new byte[nextStringLength];
                         buffer = readerUTF16.ReadBytes(nextStringLength);
                         foreach (byte b in buffer)
@@ -191,6 +185,7 @@ namespace SSE_R
                         Debug.Write($"Build version = {buildVersion}\n");
                         Debug.Write($"Map name = {mapName}\n");
                         Debug.Write($"Map options string: {mapOptions}\n");
+                        Debug.Write($"Session id = {sessionID}\n");
                         Debug.Write($"Playtime in seconds = {playedSeconds}\n");
                         Debug.Write($"Tick timestamp = {tickTimeStamp}\n");
                         Debug.Write($"Session visibility = {sessionVisibility}\n");
@@ -201,12 +196,13 @@ namespace SSE_R
                         }
                         else { Debug.Write("There is no modMetaData\n"); }
                         Debug.Write($"modFlags: {modFlags}\n");
-                        
+
                         writer.Write($"Header version = {headerVersion}\n");
                         writer.Write($"Save version = {saveVersion}\n");
                         writer.Write($"Build version = {buildVersion}\n");
                         writer.Write($"Map name = {mapName}\n");
                         writer.Write($"Map options string: {mapOptions}\n");
+                        writer.Write($"Session id = {sessionID}\n");
                         writer.Write($"Playtime in seconds = {playedSeconds}\n");
                         writer.Write($"Tick timestamp = {tickTimeStamp}\n");
                         writer.Write($"Session visibility = {sessionVisibility}\n");
@@ -218,22 +214,12 @@ namespace SSE_R
                         else { writer.Write("There is no modMetaData\n"); }
                         writer.Write($"modFlags: {modFlags}\n");
                     }
-                    try
+                    if (saveVersion < 29)
                     {
-                        if (saveVersion < 29)
-                        {
-                            throw new Exception("VersionUnsupportedException: your save file is of version 28 or lower, and is not supported, please open the game, and overwrite the save to fix this issue");
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        MessageBox.Show(e.Message, "invalid save version", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly | MessageBoxOptions.ServiceNotification, false);
-
-                        Environment.Exit(0);
+                        throw new Exception("VersionUnsupportedException: your save file is of version 28 or lower, and is not supported, please open the game, and overwrite the save to fix this issue");
                     }
 
-                    inputStream.CopyTo(header, headerLength);
-                    return header;
+                    return (header, sessionID);
                 }
             }
         }
