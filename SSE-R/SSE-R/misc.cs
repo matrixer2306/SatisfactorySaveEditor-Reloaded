@@ -1,5 +1,8 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using static SSE_R.MainApp;
 
 namespace SSE_R
 {
@@ -27,6 +30,7 @@ namespace SSE_R
         }
         public class LogFile
         {
+            
             public static async Task AddLogEntry(string info)
             {
                 using (FileStream logFile = File.OpenWrite(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SSE-R", "Logs", "Log.txt")))

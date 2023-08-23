@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Diagnostics;
+using Windows.UI.WebUI;
 using static SSE_R.misc;
 using static SSE_R.misc.LogFile;
 
 namespace SSE_R
 {
+    //TODO: investigate how viable a  AddFormItem(string type){} function is
     public partial class MainApp : Form
     {
         public MemoryStream? header;
         public MemoryStream? body;
         public List<SubLevel>? subLevels;
+        public static FileStream StreamOffsets = File.Create(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SSE-R", "Offsets.txt"));
 
         public MainApp()
         {
@@ -17,6 +20,17 @@ namespace SSE_R
             toolStrip1.Renderer = new SSE_R.misc.MySR();
         }
 
+        public static void AddFormItem(string type)
+        {
+            switch (type)
+            {
+                default:
+                    throw new Exception("Unhandled type, check spelling or implement");
+                case "Textbox":
+                    flowLayoutPanel1.Controls.Add(new TextBox());
+                    break;
+            }
+        }
 
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
@@ -33,7 +47,7 @@ namespace SSE_R
             {
                 Loading form = new Loading();
                 form.StartPosition = FormStartPosition.CenterScreen;
-                form.Show();
+                //form.Show();
                 string saveFileName = "";
                 string formattedDateTime = DateTime.Now.ToString("d-M-yyyy_HH-mm-ss");
                 //try
@@ -71,8 +85,21 @@ namespace SSE_R
                         node.ForeColor = Color.White;
                         node.Tag = s.name;
                         treeView1.Nodes.Add(node);
+
                     }
                 }
+                LevelReaders reader = new LevelReaders();
+                reader.panel = flowLayoutPanel1;
+                reader.treeView = treeView1;
+
+                SubLevel PersistentLevel = Finder.FindPersistentLevel(body);
+                subLevels.Add(PersistentLevel);
+
+                TreeNode Treenode = new TreeNode(PersistentLevel.name);
+                Treenode.ForeColor = Color.White;
+                Treenode.Tag = PersistentLevel.name;
+                treeView1.Nodes.Add(Treenode);
+
                 form.progressBar1.Value = 100;
                 form.Close();
             }
@@ -83,18 +110,45 @@ namespace SSE_R
             this.WindowState = FormWindowState.Maximized;
         }
 
+        public TreeNode previousnode;
+
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            int index = subLevels.FindIndex(s => s.name == (string)treeView1.SelectedNode.Tag);
-            if (index != subLevels.Count - 1)
+            treeView1.BeginUpdate();
+            treeView2.BeginUpdate();
+            if (treeView1.SelectedNode.Level == 0)
             {
-                LevelReaders.ReadLevel(body, subLevels[index].offset, true);
+                previousnode?.Nodes?.Clear();
             }
+            previousnode = treeView1.SelectedNode;
+            LevelReaders reader = new LevelReaders();
+            reader.panel = flowLayoutPanel1;
+            reader.treeView = treeView1;
+            if (treeView1.SelectedNode.Parent == null)
+            {
+                int index = subLevels.FindIndex(s => s.name == (string)treeView1.SelectedNode.Tag);
+                if (index != subLevels.Count - 1)
+                {
+                    reader.ReadLevel(body, subLevels[index].offset, true);
+                }
+                if (index == subLevels.Count - 1)
+                {
+                    reader.ReadLevel(body, subLevels[index].offset, false);
+                }
+            }
+            treeView2.Nodes.Clear();
+            foreach (TreeNode node in previousnode.Nodes)
+            {
+                if (node != null)
+                {
+                    node.Parent.Nodes.Remove(node);
 
-            foreach (TreeNode node in treeView1.SelectedNode.Nodes)
-            {
-                treeView2.Nodes.Add(node);
+                    treeView2.Nodes.Add(node);
+                }
+
             }
+            treeView1.EndUpdate();
+            treeView2.EndUpdate();
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)

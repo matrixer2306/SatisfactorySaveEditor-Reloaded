@@ -158,7 +158,7 @@
         private TreeView treeView2;
         private ToolStrip toolStrip1;
         private ToolStripButton toolStripButton1;
-        private FlowLayoutPanel flowLayoutPanel1;
+        private static FlowLayoutPanel flowLayoutPanel1;
         private ToolStripButton toolStripButton2;
     }
 }

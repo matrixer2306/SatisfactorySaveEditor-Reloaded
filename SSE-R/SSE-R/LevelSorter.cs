@@ -38,9 +38,7 @@ namespace SSE_R
                                     if (buffer[index + 6] == target[6])
                                     {
                                         offsets.Add(index);
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                                         AddLogEntry("\nfound an offset\n");
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                                         index += 6;
                                     }
                                 }

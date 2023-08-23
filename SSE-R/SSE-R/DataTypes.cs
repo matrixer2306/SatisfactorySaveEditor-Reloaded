@@ -16,16 +16,17 @@ namespace SSE_R
             {
                 switch (arrayType)
                 {
-                    case "ByteProperty":
+                    case "ByteProperty\0":
                         int byteValue = stream.ReadByte(); break;
-                    case "EnumProperty":
+                    case "EnumProperty\0":
                         string stringValue = ReadString(stream); break;
-                    case "InterfaceProperty":
-                    case "ObjectProperty":
-                        string levelName = ReadString(stream); string pathName = ReadString(stream); break;
-                    case "IntProperty":
+                    case "InterfaceProperty\0":
+                    case "ObjectProperty\0":
+                        string levelName = ReadString(stream); 
+                        string pathName = ReadString(stream); break;
+                    case "IntProperty\0":
                         int intValue = ReadInt32(stream); break;
-                    case "StructProperty":
+                    case "StructProperty\0":
                         string name = ReadString(stream);
                         string type = ReadString(stream);
                         int size = ReadInt32(stream);
@@ -33,13 +34,18 @@ namespace SSE_R
                         string elementType = ReadString(stream);
                         ReadInt32(stream);
                         ReadInt32(stream);
-                        ReadInt32(stream);
-                        ReadInt32(stream);
+                        //ReadInt32(stream);
+                        //ReadInt32(stream);
                         stream.ReadByte();
                         ListReaders.TypedData(stream);
                         break;
                 }
             }
+            //string holder = ReadString(stream);
+            //if (holder == "None" || holder == "None\0")
+            //{
+            //    return;
+            //}
         }
         public static void BoolProperty(MemoryStream stream)
         {
@@ -54,7 +60,7 @@ namespace SSE_R
             int index = ReadInt32(stream);
             string type = ReadString(stream);
             stream.ReadByte();
-            if (type == "None")
+            if (type == "None\0")
             {
                 int value = stream.ReadByte();
             }

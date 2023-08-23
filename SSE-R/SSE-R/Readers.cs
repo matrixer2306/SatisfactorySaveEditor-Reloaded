@@ -12,7 +12,7 @@ using System.Diagnostics;
 
 namespace SSE_R
 {
-    internal class Readers
+    public class Readers
     {
         public static int ReadInt32(MemoryStream stream)
         {
@@ -22,8 +22,14 @@ namespace SSE_R
         }
         public static string ReadString(MemoryStream stream)
         {
+            //Debug.WriteLine(stream.Position); 
             string output = "";
             int length = ReadInt32(stream);
+            if (length < 0)
+            {
+                length = Math.Abs(length);
+                length *= 2;
+            }
             byte[] data = new byte[length];
             stream.Read(data, 0, length);
             foreach(byte b in data)
@@ -45,7 +51,7 @@ namespace SSE_R
             return BitConverter.ToInt64(data, 0);
         }
     }
-    internal class ListReaders
+    public class ListReaders
     {
         public static void ReadPropertyList(MemoryStream stream)
         {
@@ -95,16 +101,17 @@ namespace SSE_R
                     default:
                         try
                         {
-                            throw new Exception($"UnhandledDataTypeExecption: {type} is unhandled");
+                            throw new Exception($"UnhandledDataTypeExecption: {type} is unhandled, read around position {stream.Position}");
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show(ex.Message, "invalid data type", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly | MessageBoxOptions.ServiceNotification, false);
+                            //MessageBox.Show(ex.Message, "invalid data type", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly | MessageBoxOptions.ServiceNotification, false);
                             break;
                         }
                 }
             }
         }
+
         public static void TypedData(MemoryStream stream)
         {
             while (true)
@@ -119,18 +126,11 @@ namespace SSE_R
                 {
                     break;
                 }
-                TypedData(stream, type);
-            }
-        }
-        public static void TypedData(MemoryStream stream, string type)
-        {
-            //while (true)
-            //{
-            //
+
                 string[] arrayTypes = { "ArrayProperty\0", "BoolProperty\0", "ByteProperty\0", "EnumProperty\0", "FloatProperty\0", "IntProperty\0",
                                         "Int64Property\0", "MapProperty\0", "NameProperty\0", "ObjectProperty\0", "SetProperty\0", "StrPropert\0",
                                         "StructProperty\0", "TextProperty\0"};
-                if(Array.IndexOf(arrayTypes, type) >= 0)
+                if (Array.IndexOf(arrayTypes, type) >= 0)
                 {
                     switch (type)
                     {
@@ -186,12 +186,14 @@ namespace SSE_R
                         default: ReadPropertyList(stream); break;
                     }
                 }
-            //}
+            }
         }
     }
-    internal class LevelReaders
+    public class LevelReaders
     {
-        public static void ReadLevel(MemoryStream stream, long offset, bool isSubLevel = true)
+        public FlowLayoutPanel panel;
+        public TreeView treeView;
+        public void ReadLevel(MemoryStream stream, long offset, bool isSubLevel = true, bool expandTree = true)
         {
             stream.Position = offset;
             if (isSubLevel) // read name if it is a sublevel
@@ -203,6 +205,7 @@ namespace SSE_R
             int actorHeaderCount = 0;
             for (int i = 0; i < objectHeaderCount; i++) //object headers
             {
+                
                 int headerType = ReadInt32(stream);
                 if (headerType == 1)
                 {
@@ -210,6 +213,16 @@ namespace SSE_R
                     string typePath = ReadString(stream);
                     string rootObject = ReadString(stream);
                     string instanceName = ReadString(stream);
+
+                    if (expandTree)
+                    {
+                        TreeNode objectInstanceName = new TreeNode();
+                        objectInstanceName.Text = instanceName;
+                        objectInstanceName.Tag = i;
+                        objectInstanceName.ForeColor = Color.White;
+                        treeView.SelectedNode.Nodes.Add(objectInstanceName);
+                    }
+
                     int needTransform = ReadInt32(stream);
                     float rotX = readFloat(stream);
                     float rotY = readFloat(stream);
@@ -245,7 +258,7 @@ namespace SSE_R
                 {
                     int size = ReadInt32(stream);
                     long position = stream.Position;
-                    string parentObjecctRoot = ReadString(stream);
+                    string parentObjectRoot = ReadString(stream);
                     string parentObjectName = ReadString(stream);
                     int componentCount = ReadInt32(stream);
                     for (int k = 0; k < componentCount; k++)
