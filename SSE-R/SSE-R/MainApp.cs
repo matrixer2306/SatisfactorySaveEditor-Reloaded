@@ -20,20 +20,33 @@ namespace SSE_R
             toolStrip1.Renderer = new SSE_R.misc.MySR();
         }
 
-        public static void AddFormItem(string type)
-        {
-            switch (type)
-            {
-                default:
-                    throw new Exception("Unhandled type, check spelling or implement");
-                case "Textbox":
-                    flowLayoutPanel1.Controls.Add(new TextBox());
-                    break;
-            }
-        }
+        //public static void AddFormItem(string type)
+        //{
+        //    switch (type)
+        //    {
+        //        default:
+        //            throw new Exception("Unhandled type, check spelling or implement");
+        //        case "Textbox":
+        //            flowLayoutPanel1.Controls.Add(new TextBox());
+        //            break;
+        //    }
+        //}
 
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
+            treeView1.BeginUpdate();
+            treeView2.BeginUpdate();
+            treeView1.Nodes.Clear();
+            treeView2.Nodes.Clear();
+            header = null;
+            body = null;
+            if(subLevels != null)
+            {
+                subLevels.Clear();
+            }
+            GC.Collect(); //collect garbage
+            treeView1.EndUpdate();
+            treeView2.EndUpdate();
             OpenFileDialog filePicker = new OpenFileDialog();
             string appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
             string inputPath = "";
@@ -56,6 +69,10 @@ namespace SSE_R
                 var headerobj = Parser.ParseHeader(inputPath, outputPath);
                 header = headerobj.Item1;
                 saveFileName = headerobj.Item2;
+                if(headerobj.Item3 == true)
+                {
+                    return;
+                }
                 saveFileName = saveFileName.TrimEnd('\0');
                 if (File.Exists(Path.Combine(outputPath, "Header.bin")))
                 {
@@ -95,10 +112,12 @@ namespace SSE_R
                 SubLevel PersistentLevel = Finder.FindPersistentLevel(body);
                 subLevels.Add(PersistentLevel);
 
+                treeView1.BeginUpdate();
                 TreeNode Treenode = new TreeNode(PersistentLevel.name);
                 Treenode.ForeColor = Color.White;
                 Treenode.Tag = PersistentLevel.name;
                 treeView1.Nodes.Add(Treenode);
+                treeView1.EndUpdate();
 
                 form.progressBar1.Value = 100;
                 form.Close();
@@ -157,6 +176,19 @@ namespace SSE_R
             {
                 File.Delete(file);
             }
+        }
+        private void toolStripButton3_Click(object sender, EventArgs e)
+        {
+            treeView1.BeginUpdate();
+            treeView2.BeginUpdate();
+            treeView1.Nodes.Clear();
+            treeView2.Nodes.Clear();
+            header = null;
+            body = null;
+            subLevels.Clear();
+            GC.Collect(); //collect garbage
+            treeView1.EndUpdate();
+            treeView2.EndUpdate();
         }
     }
 }

@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "BhV1RlhzKzgJ+V/on9xbnrSmxiMpWdEc2vQM7NHZ8uVOJeoHuLF78hujGHcJ7fQNetx25dllt9f787P3R+n+9g==",
+  "dgSpecHash": "81QI9cuPuDXD6XqzDaBQBXO0hqSPCoz9u/wpfD7GmZxTd7l5a2lore0jfcRYzPKaGRFazfWZmij7hm56TLlbDw==",
   "success": true,
   "projectFilePath": "C:\\Users\\Joël\\Documents\\GitHub\\SatisfactorySaveEditor-Reloaded\\SSE-R\\SSE-R\\SSE-R.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Joël\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.22621.28\\microsoft.windows.sdk.net.ref.10.0.22621.28.nupkg.sha512"
+    "C:\\Users\\Joël\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.22621.29\\microsoft.windows.sdk.net.ref.10.0.22621.29.nupkg.sha512"
   ],
   "logs": []
 }

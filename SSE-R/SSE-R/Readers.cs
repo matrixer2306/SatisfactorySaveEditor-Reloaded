@@ -22,13 +22,17 @@ namespace SSE_R
         }
         public static string ReadString(MemoryStream stream)
         {
-            //Debug.WriteLine(stream.Position); 
+            long pos = stream.Position;
             string output = "";
             int length = ReadInt32(stream);
             if (length < 0)
             {
                 length = Math.Abs(length);
                 length *= 2;
+            }
+            if (length >= stream.Length - stream.Position)
+            {
+                throw new Exception();
             }
             byte[] data = new byte[length];
             stream.Read(data, 0, length);
@@ -50,13 +54,20 @@ namespace SSE_R
             stream.Read(data, 0, 8);
             return BitConverter.ToInt64(data, 0);
         }
+        public static sbyte ReadInt8(MemoryStream stream)
+        {
+            return (sbyte)stream.ReadByte();
+        }
     }
     public class ListReaders
     {
         public static void ReadPropertyList(MemoryStream stream)
         {
+            int testvar = 0;
             while(true)
             {
+                testvar++;
+                long position = stream.Position;
                 string name = ReadString(stream);
                 if (name == "None\0")
                 {
@@ -82,6 +93,8 @@ namespace SSE_R
                         FloatProperty(stream); break;
                     case "IntProperty\0":
                         IntProperty(stream); break;
+                    case "Int8Property\0":
+                        Int8Property(stream); break;
                     case "Int64Property\0":
                         Int64Property(stream); break;
                     case "MapProperty\0":
@@ -99,15 +112,7 @@ namespace SSE_R
                     case "TextProperty\0":
                         TextProperty(stream); break;
                     default:
-                        try
-                        {
                             throw new Exception($"UnhandledDataTypeExecption: {type} is unhandled, read around position {stream.Position}");
-                        }
-                        catch (Exception ex)
-                        {
-                            //MessageBox.Show(ex.Message, "invalid data type", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly | MessageBoxOptions.ServiceNotification, false);
-                            break;
-                        }
                 }
             }
         }
@@ -116,19 +121,20 @@ namespace SSE_R
         {
             while (true)
             {
+                long position = stream.Position;
                 string name = ReadString(stream);
                 if (name == "None\0")
                 {
-                    break;
+                    return;
                 }
                 string type = ReadString(stream);
                 if (type == "None\0")
                 {
-                    break;
+                    return;
                 }
 
                 string[] arrayTypes = { "ArrayProperty\0", "BoolProperty\0", "ByteProperty\0", "EnumProperty\0", "FloatProperty\0", "IntProperty\0",
-                                        "Int64Property\0", "MapProperty\0", "NameProperty\0", "ObjectProperty\0", "SetProperty\0", "StrPropert\0",
+                                        "Int64Property\0", "MapProperty\0", "NameProperty\0", "ObjectProperty\0", "SetProperty\0", "StrProperty\0",
                                         "StructProperty\0", "TextProperty\0"};
                 if (Array.IndexOf(arrayTypes, type) >= 0)
                 {
@@ -167,6 +173,7 @@ namespace SSE_R
                 else
                 {
                     stream.Seek(17, SeekOrigin.Current);
+                    
                     switch (type)
                     {
                         case "Box\0":

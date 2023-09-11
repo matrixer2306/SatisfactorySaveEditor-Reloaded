@@ -12,13 +12,17 @@ namespace SSE_R
             string arrayType = ReadString(stream);
             stream.Seek(1, SeekOrigin.Current);
             int length = ReadInt32(stream);
+            long structStartPos = 0;
+            int size = 0;
             for (int i = 0; i < length; i++)
             {
+                long position = stream.Position;
                 switch (arrayType)
                 {
                     case "ByteProperty\0":
                         int byteValue = stream.ReadByte(); break;
                     case "EnumProperty\0":
+                    case "StrProperty\0":
                         string stringValue = ReadString(stream); break;
                     case "InterfaceProperty\0":
                     case "ObjectProperty\0":
@@ -26,19 +30,44 @@ namespace SSE_R
                         string pathName = ReadString(stream); break;
                     case "IntProperty\0":
                         int intValue = ReadInt32(stream); break;
+                    case "Int64Property\0":
+                        long longValue = readLong(stream); break;
                     case "StructProperty\0":
                         string name = ReadString(stream);
                         string type = ReadString(stream);
-                        int size = ReadInt32(stream);
+                        if (type != "StructProperty\0")
+                        {
+                            throw new Exception();
+                        }
+                        size = ReadInt32(stream);
                         stream.Seek(4, SeekOrigin.Current);
                         string elementType = ReadString(stream);
-                        ReadInt32(stream);
-                        ReadInt32(stream);
-                        //ReadInt32(stream);
-                        //ReadInt32(stream);
-                        stream.ReadByte();
-                        ListReaders.TypedData(stream);
-                        break;
+                        stream.Seek(17, SeekOrigin.Current);
+                        structStartPos = stream.Position;
+                        while (stream.Position < structStartPos + size)
+                        {
+                            string[] datatypes = { "Box\0", "FluidBox\0", "InventoryItem\0", "LinearColor\0", "Quat\0", "RailroadTrackPosition\0", "Vector\0" };
+                            if (Array.IndexOf(datatypes, elementType) >= 0)
+                            {
+                                switch (elementType)
+                                {
+                                    case "Box\0": Box(stream); break;
+                                    case "FluidBox\0": FluidBox(stream); break;
+                                    case "InventoryItem\0": InventoryItem(stream); break;
+                                    case "LinearColor\0": LinearColor(stream); break;
+                                    case "Quat\0": Quat(stream); break;
+                                    case "RailroadTrackPosition\0": RailRoadTrackPosition(stream); break;
+                                    case "Vector\0": Vector(stream); break;
+                                    default: throw new Exception();
+                                }
+                            }
+                            else
+                            {
+                                ListReaders.TypedData(stream);
+                            }
+                        }
+                        return;
+                    default: throw new Exception();
                 }
             }
             //string holder = ReadString(stream);
@@ -91,6 +120,13 @@ namespace SSE_R
             stream.ReadByte();
             int value = ReadInt32(stream);
         }
+        public static void Int8Property(MemoryStream stream)
+        {
+            int size = ReadInt32(stream);
+            int index = ReadInt32(stream);
+            stream.ReadByte();
+            sbyte value = ReadInt8(stream);
+        }
         public static void Int64Property(MemoryStream stream)
         {
             int size = ReadInt32(stream);
@@ -111,22 +147,26 @@ namespace SSE_R
             {
                 switch (keyType)
                 {
-                    case "ObjectProperty":
+                    case "ObjectProperty\0":
                         string levelName = ReadString(stream);
                         string pathName = ReadString(stream);
                         break;
+                    case "IntProperty\0":
+                        int intValue = ReadInt32(stream); break;
+                    case "EnumProperty\0":
+                        string stringValue = ReadString(stream); break;
                     default:
                         throw new Exception("unknown key type");
                 }
                 switch (valueType)
                 {
-                    case "ByteProperty":
+                    case "ByteProperty\0":
                         int byteValue = stream.ReadByte();
                         break;
-                    case "IntProperty":
-                        int intValue = stream.ReadByte();
+                    case "IntProperty\0":
+                        int intValue = ReadInt32(stream);
                         break;
-                    case "StructProperty":
+                    case "StructProperty\0":
                         ListReaders.ReadPropertyList(stream);
                         break;
                 }
@@ -158,7 +198,7 @@ namespace SSE_R
             {
                 switch (type)
                 {
-                    case "StructProperty":
+                    case "StructProperty\0":
                         float locationX = readFloat(stream);
                         float locationY = readFloat(stream);
                         float locationZ = readFloat(stream);
@@ -181,13 +221,28 @@ namespace SSE_R
             int index = ReadInt32(stream);
             string type = ReadString(stream);
             stream.Seek(17, SeekOrigin.Current);
-            if(type == "InventoryItem\0")
+            long dataStart = stream.Position;
+            while (stream.Position - dataStart < size)
             {
-                InventoryItem(stream);
-            }
-            else
-            {
-                ListReaders.TypedData(stream);
+                string[] datatypes = { "Box\0", "FluidBox\0", "InventoryItem\0", "LinearColor\0", "Quat\0", "RailroadTrackPosition\0", "Vector\0" };
+                if (Array.IndexOf(datatypes, type) >= 0)
+                {
+                    switch (type)
+                    {
+                        case "Box\0": Box(stream); break;
+                        case "FluidBox\0": FluidBox(stream); break;
+                        case "InventoryItem\0": InventoryItem(stream); break;
+                        case "LinearColor\0": LinearColor(stream); break;
+                        case "Quat\0": Quat(stream); break;
+                        case "RailroadTrackPosition\0": RailRoadTrackPosition(stream); break;
+                        case "Vector\0": Vector(stream); break;
+                        default: throw new Exception();
+                    }
+                }
+                else
+                {
+                    ListReaders.TypedData(stream);
+                }
             }
         }
         public static void TextProperty(MemoryStream stream)

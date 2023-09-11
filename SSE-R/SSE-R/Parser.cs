@@ -106,7 +106,7 @@ namespace SSE_R
             }
         }
 
-        public static (MemoryStream, string) ParseHeader(string inputPath, string outputPath)
+        public static (MemoryStream, string, bool) ParseHeader(string inputPath, string outputPath)
         {
             using (FileStream inputStream = File.OpenRead(inputPath))
             {
@@ -216,12 +216,21 @@ namespace SSE_R
                         else { writer.Write("There is no modMetaData\n"); }
                         writer.Write($"modFlags: {modFlags}\n");
                     }
-                    if (saveVersion < 29)
+                    bool failedToParse = false;
+                    if (saveVersion < 36)
                     {
-                        throw new Exception("VersionUnsupportedException: your save file is of version 28 or lower, and is not supported, please open the game, and overwrite the save to fix this issue");
+                        try
+                        {
+                            throw new Exception("VersionUnsupportedException: your save file is of version 35 or lower, please select a different save, or save the world in a newer version of the game");
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show(e.Message);
+                            failedToParse = true;
+                        }
                     }
 
-                    return (header, sessionID);
+                    return (header, sessionID, failedToParse);
                 }
             }
         }
