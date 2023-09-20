@@ -125,11 +125,6 @@ namespace SSE_R
         {
             treeView1.BeginUpdate();
             treeView2.BeginUpdate();
-            if (treeView1.SelectedNode.Level == 0)
-            {
-                previousnode?.Nodes?.Clear();
-            }
-            previousnode = treeView1.SelectedNode;
             LevelReaders reader = new LevelReaders();
             reader.panel = flowLayoutPanel1;
             reader.treeView = treeView1;
@@ -145,22 +140,16 @@ namespace SSE_R
                     reader.ReadLevel(body, subLevels[index].offset, false);
                 }
             }
-            if(previousnode.Nodes.Count != 0)
+            
+            foreach (TreeNode node in treeView1.SelectedNode.Nodes)
             {
-                treeView2.Nodes.Clear();
-                foreach (TreeNode node in previousnode.Nodes)
+                if (!treeView2.Nodes.Contains(node) && node is TreeNode)
                 {
-                    if (node != null)
-                    {
-                        //node.Parent.Nodes.Remove(node);
-                        if (!node.Parent.Nodes.Contains(node) || !treeView2.Nodes.Contains(node))
-                        {
-                            treeView2.Nodes.Add(node);
-                        }
-                    }
-
+                    TreeNode nodeCopy = nodeCopy = (TreeNode)node.Clone();
+                    treeView2.Nodes.Add(nodeCopy);
+                   
                 }
-            } 
+            }
             treeView1.EndUpdate();
             treeView2.EndUpdate();
         }
