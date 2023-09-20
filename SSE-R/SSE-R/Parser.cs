@@ -8,7 +8,7 @@ namespace SSE_R
     public class Parser
     {
         // decompresses chunks and writes the data to an output file
-        public static MemoryStream ParseBody(string inputPath, string outputPath, string fileName = "body.bin")
+        public static MemoryStream ParseBody(string inputPath, string outputPath, int saveversion, string fileName = "body.bin")
         {
             FileStream inputStream = new(inputPath, FileMode.Open);
             //FileStream outputStream = File.Create(Path.Combine(outputPath, "Body.bin"));
@@ -62,12 +62,27 @@ namespace SSE_R
                                     b = inputStream.ReadByte();
                                     if (b == 0x9E)
                                     {
-                                        inputStream.Seek(12, SeekOrigin.Current);
+                                        if (saveversion >= 40)
+                                        {
+                                            inputStream.Seek(13, SeekOrigin.Current);
+                                        }
+                                        else
+                                        {
+                                            inputStream.Seek(12, SeekOrigin.Current);
+                                        }
                                         inputStream.Read(buffer, 0, 4);
                                         compressedChunkLength = BitConverter.ToInt32(buffer, 0);
                                         inputStream.Seek(4, SeekOrigin.Current);
                                         inputStream.Read(buffer, 0, 4);
                                         decompressedChunkLength = BitConverter.ToInt32(buffer, 0);
+                                        //if(saveversion >= 42)
+                                        //{
+                                        //    inputStream.Seek(23, SeekOrigin.Current);
+                                        //}
+                                        //else
+                                        //{
+                                        //    inputStream.Seek(22, SeekOrigin.Current);
+                                        //}
                                         inputStream.Seek(22, SeekOrigin.Current);
                                         foundStart = true;
                                         chunkCount++;
@@ -106,7 +121,7 @@ namespace SSE_R
             }
         }
 
-        public static (MemoryStream, string, bool) ParseHeader(string inputPath, string outputPath)
+        public static (MemoryStream, string, bool, int) ParseHeader(string inputPath, string outputPath)
         {
             using (FileStream inputStream = File.OpenRead(inputPath))
             {
@@ -169,7 +184,7 @@ namespace SSE_R
                         {
                             modMetaData += (char)b;
                         }
-                        headerLength += nextStringLength;
+                        headerLength += nextStringLength + 4;
                     }
                     else
                     {
@@ -230,7 +245,7 @@ namespace SSE_R
                         }
                     }
 
-                    return (header, sessionID, failedToParse);
+                    return (header, sessionID, failedToParse, saveVersion);
                 }
             }
         }

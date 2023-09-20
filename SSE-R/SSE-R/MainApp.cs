@@ -19,19 +19,6 @@ namespace SSE_R
             InitializeComponent();
             toolStrip1.Renderer = new SSE_R.misc.MySR();
         }
-
-        //public static void AddFormItem(string type)
-        //{
-        //    switch (type)
-        //    {
-        //        default:
-        //            throw new Exception("Unhandled type, check spelling or implement");
-        //        case "Textbox":
-        //            flowLayoutPanel1.Controls.Add(new TextBox());
-        //            break;
-        //    }
-        //}
-
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
             treeView1.BeginUpdate();
@@ -40,7 +27,7 @@ namespace SSE_R
             treeView2.Nodes.Clear();
             header = null;
             body = null;
-            if(subLevels != null)
+            if (subLevels != null)
             {
                 subLevels.Clear();
             }
@@ -69,14 +56,17 @@ namespace SSE_R
                 var headerobj = Parser.ParseHeader(inputPath, outputPath);
                 header = headerobj.Item1;
                 saveFileName = headerobj.Item2;
-                if(headerobj.Item3 == true)
+                string windowname = headerobj.Item2 + " - save version: " + headerobj.Item4;
+                windowname = windowname.Replace("\0", "");
+                this.Text = windowname;
+                if (headerobj.Item3 == true)
                 {
                     return;
                 }
                 saveFileName = saveFileName.TrimEnd('\0');
                 if (File.Exists(Path.Combine(outputPath, "Header.bin")))
                 {
-                    File.Move(Path.Combine(outputPath, "Header.bin"), Path.Combine(outputPath, $"{"[HEADER] " + saveFileName + " " + formattedDateTime}.bin"));
+                    File.Move(Path.Combine(outputPath, "Header.bin"), Path.Combine(outputPath, $"{"[HEADER] " + saveFileName + " " + formattedDateTime}.bin.Header"));
                 }
                 //}
                 //catch (Exception ex)
@@ -87,8 +77,8 @@ namespace SSE_R
                 //}
                 form.progressBar1.Value = 10;
                 form.Text = "decompressing body";
-                body = Parser.ParseBody(inputPath, outputPath, $"{"[BODY] " + saveFileName + " " + formattedDateTime}.bin");
-                Debug.WriteLine($"Sent file to {Path.Combine(outputPath, $"{"[BODY] " + saveFileName + " " + formattedDateTime}.bin")}");
+                body = Parser.ParseBody(inputPath, outputPath, headerobj.Item4, $"{"[BODY] " + saveFileName + " " + formattedDateTime}.bin.Body");
+                Debug.WriteLine($"Sent file to {Path.Combine(outputPath, $"{"[BODY] " + saveFileName + " " + formattedDateTime}.bin.Body")}");
                 form.progressBar1.Value = 90;
                 form.Text = "finding sublevels";
                 subLevels = Finder.FindSubLevels(body);
@@ -155,24 +145,29 @@ namespace SSE_R
                     reader.ReadLevel(body, subLevels[index].offset, false);
                 }
             }
-            treeView2.Nodes.Clear();
-            foreach (TreeNode node in previousnode.Nodes)
+            if(previousnode.Nodes.Count != 0)
             {
-                if (node != null)
+                treeView2.Nodes.Clear();
+                foreach (TreeNode node in previousnode.Nodes)
                 {
-                    node.Parent.Nodes.Remove(node);
+                    if (node != null)
+                    {
+                        //node.Parent.Nodes.Remove(node);
+                        if (!node.Parent.Nodes.Contains(node) || !treeView2.Nodes.Contains(node))
+                        {
+                            treeView2.Nodes.Add(node);
+                        }
+                    }
 
-                    treeView2.Nodes.Add(node);
                 }
-
-            }
+            } 
             treeView1.EndUpdate();
             treeView2.EndUpdate();
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
-            foreach (string file in Directory.GetFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SSE-R"), "*.bin"))
+            foreach (string file in Directory.GetFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SSE-R"), "*.bin.*"))
             {
                 File.Delete(file);
             }
